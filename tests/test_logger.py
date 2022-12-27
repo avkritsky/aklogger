@@ -1,7 +1,6 @@
 import pytest
 
-from models import logger
-from models import record
+from src.models import logger
 
 
 def test_logger_save_last_log():
@@ -9,10 +8,10 @@ def test_logger_save_last_log():
 
     a.info('test')
 
-    assert a.last_log == record.Record(user='avkritsky',
+    assert a.last_log == logger.Record(user='avkritsky',
                                        project='autoblock',
                                        ref='test_logger_save_last_log',
-                                       level=record.Level.INFO.value,
+                                       level=logger.Level.INFO.value,
                                        mess='test')
 
 
@@ -26,6 +25,46 @@ def test_level_checked():
     a.critical('test critical')
 
     assert a.last_log.mess == 'test critical'
+
+
+@pytest.mark.parametrize('ref1, ref2, level1, level2',
+                         [
+                             ('test_for_debug','test_for_debug1',4,3),
+                             ('test_for_warning','test_for_warning1',3,2),
+                             ('test_for_info','test_for_info1',2,1),
+                             ('test_for_critical','test_for_critical1',1,0),
+                             ('test_for_error','test_for_error1',0,-1),
+                         ])
+def test_for_debug(ref1, ref2, level1, level2):
+    a = logger.Logger(user='avkritsky', project='autoblock', ref=ref1, level=level1)
+
+    if level1 == 4:
+        assert a.debug('test_mess')
+    elif level1 == 3:
+        assert a.warning('test_mess')
+    elif level1 == 2:
+        assert a.info('test_mess')
+    elif level1 == 1:
+        assert a.critical('test_mess')
+    elif level1 == 0:
+        assert a.error('test_mess')
+
+    assert a.last_log.mess == 'test_mess'
+
+    b = logger.Logger(user='avkritsky', project='autoblock', ref=ref2, level=level2)
+
+    if level1 == 4:
+        assert not b.debug('rest')
+    elif level1 == 3:
+        assert not b.warning('rest')
+    elif level1 == 2:
+        assert not b.info('rest')
+    elif level1 == 1:
+        assert not b.critical('rest')
+    elif level1 == 0:
+        assert not b.error('rest')
+
+    assert b.last_log is None
 
 
 def test_alert_for_not_str_message():
