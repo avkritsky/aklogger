@@ -1,22 +1,22 @@
 import pytest
 
-from src.models import logger
+from src.logger import models
 
 
 def test_logger_save_last_log():
-    a = logger.Logger(user='avkritsky', project='autoblock', ref='test_logger_save_last_log')
+    a = models.Logger(user='avkritsky', project='autoblock', ref='test_logger_save_last_log')
 
     a.info('test')
 
-    assert a.last_log == logger.Record(user='avkritsky',
+    assert a.last_log == models.Record(user='avkritsky',
                                        project='autoblock',
                                        ref='test_logger_save_last_log',
-                                       level=logger.Level.INFO.value,
+                                       level=models.Level.INFO.value,
                                        mess='test')
 
 
 def test_level_checked():
-    a = logger.Logger(user='avkritsky', project='autoblock', ref='test_level_checked', level=1)
+    a = models.Logger(user='avkritsky', project='autoblock', ref='test_level_checked', level=1)
 
     a.info('test INFO level')
 
@@ -36,7 +36,7 @@ def test_level_checked():
                              ('test_for_error','test_for_error1',0,-1),
                          ])
 def test_for_debug(ref1, ref2, level1, level2):
-    a = logger.Logger(user='avkritsky', project='autoblock', ref=ref1, level=level1)
+    a = models.Logger(user='avkritsky', project='autoblock', ref=ref1, level=level1)
 
     if level1 == 4:
         assert a.debug('test_mess')
@@ -51,7 +51,7 @@ def test_for_debug(ref1, ref2, level1, level2):
 
     assert a.last_log.mess == 'test_mess'
 
-    b = logger.Logger(user='avkritsky', project='autoblock', ref=ref2, level=level2)
+    b = models.Logger(user='avkritsky', project='autoblock', ref=ref2, level=level2)
 
     if level1 == 4:
         assert not b.debug('rest')
@@ -68,28 +68,28 @@ def test_for_debug(ref1, ref2, level1, level2):
 
 
 def test_alert_for_not_str_message():
-    a = logger.Logger(user='avkritsky', project='autoblock', ref='test_alert_for_not_str_message', level=2)
+    a = models.Logger(user='avkritsky', project='autoblock', ref='test_alert_for_not_str_message', level=2)
 
-    with pytest.raises(logger.NotValidMessage):
+    with pytest.raises(models.NotValidMessage):
         a.info(243)
 
 
 def test_can_created_exist_logger_by_ref():
-    a = logger.Logger(user='avkritsky', project='autoblock', ref='test_can_created_exist_logger_by_ref', level=2)
+    a = models.Logger(user='avkritsky', project='autoblock', ref='test_can_created_exist_logger_by_ref', level=2)
     a.info('test ref')
 
-    b = logger.Logger(ref='test_can_created_exist_logger_by_ref')
+    b = models.Logger(ref='test_can_created_exist_logger_by_ref')
 
     assert b.last_log.mess == 'test ref'
 
 
 
 def test_get_from_instance_for_already_in_id():
-    a = logger.Logger(user='avkritsky', project='autoblock', ref='iddqd')
+    a = models.Logger(user='avkritsky', project='autoblock', ref='iddqd')
     a.info('test message')
 
-    b = logger.Logger(user='avkritsky', project='autoblock', ref='iddqd')
-    c = logger.Logger(user='avkritsky', project='autoblock', ref='aezakmi')
+    b = models.Logger(user='avkritsky', project='autoblock', ref='iddqd')
+    c = models.Logger(user='avkritsky', project='autoblock', ref='aezakmi')
 
     assert b.last_log.mess == 'test message'
     assert c.last_log != b.last_log
