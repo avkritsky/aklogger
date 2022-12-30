@@ -1,1 +1,2 @@
-API_ROUTE = 'test'
+API_LOGGER = 'http://0.0.0.0:7007'
+API_ADD_RECORD = f'{API_LOGGER}/v1/add'

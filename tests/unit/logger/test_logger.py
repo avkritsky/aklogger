@@ -1,6 +1,8 @@
 import pytest
 
+from src.logger import record
 from src.logger import models
+from src.adapters.repository_api import ApiFakeRepository
 
 
 def test_logger_save_last_log():
@@ -8,10 +10,10 @@ def test_logger_save_last_log():
 
     a.info('test')
 
-    assert a.last_log == models.Record(user='avkritsky',
+    assert a.last_log == record.Record(user='avkritsky',
                                        project='autoblock',
                                        ref='test_logger_save_last_log',
-                                       level=models.Level.INFO.value,
+                                       level=record.Level.INFO.value,
                                        mess='test')
 
 
@@ -93,3 +95,19 @@ def test_get_from_instance_for_already_in_id():
 
     assert b.last_log.mess == 'test message'
     assert c.last_log != b.last_log
+
+
+def test_sending_record_to_api_with_fake_adapter():
+    adapter = ApiFakeRepository()
+    logger = models.Logger(user='avkritsky', project='autoblock',
+                           ref='test_sending_record_to_api_with_fake_adapter', level=2, api_repository=adapter)
+
+    logger.critical('test_message')
+
+    assert logger.last_log in adapter.sended
+
+    logger.debug('test debug message')
+
+    assert logger.last_log.mess == 'test_message'
+    assert len(adapter.sended) == 1
+

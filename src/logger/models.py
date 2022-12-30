@@ -1,36 +1,19 @@
-from dataclasses import dataclass
 from typing import Optional
-from enum import Enum
 
-
-class Level(Enum):
-    """
-    DEBUG = 4
-    WARNING = 3
-    INFO = 2
-    CRITICAL = 1
-    ERROR = 0
-    """
-    DEBUG = 4
-    WARNING = 3
-    INFO = 2
-    CRITICAL = 1
-    ERROR = 0
-
-
-@dataclass(frozen=True)
-class Record:
-    user: str
-    project: str
-    ref: str
-    level: int
-    mess: str
+from src.logger.record import Record, Level
+from src.adapters.abc_repository import ApiAbstractRepository
+from src.adapters.repository_api import ApiRepository
 
 
 class Logger:
     _instance: dict = {}
 
-    def __init__(self, ref: str, user: str = 'none', project: str = 'common', level: int = 4):
+    def __init__(self,
+                 ref: str,  # уникальный параметр, будет использован в имени лога (номер/имя таска, имя проекта и т.д.)
+                 user: str = 'none',
+                 project: str = 'common',
+                 level: int = 4,
+                 api_repository: ApiAbstractRepository = ApiRepository()):
         if ref in self.__class__._instance:
             self.__dict__ = self.__class__._instance[ref].__dict__
         else:
@@ -39,6 +22,7 @@ class Logger:
             self.ref = ref
             self.last_log: Optional[Record] = None
             self.level = level
+            self.repository = api_repository
             self.__class__._instance[ref] = self
 
     def debug(self, mess: str) -> bool:
@@ -86,7 +70,7 @@ class Logger:
 
     def _save_log(self):
         """Метод отправляет лог в API"""
-        ...
+        self.repository.add(self.last_log)
 
 
 class NotValidMessage(Exception):

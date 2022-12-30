@@ -1,8 +1,8 @@
 import abc
 
-from src.logger.models import Record
+from src.logger.record import Record
 
-class Repository(abc.ABC):
+class ApiAbstractRepository(abc.ABC):
 
     @abc.abstractmethod
     def add(self, record: Record):

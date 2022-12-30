@@ -1,31 +1,34 @@
 from urllib import request, parse
+import json
 
-from src.adapters.abc_repository import Repository
-from src.logger.models import Record
-from src.config import API_ROUTE
+from src.adapters.abc_repository import ApiAbstractRepository
+from src.logger.record import Record
+from src.config import API_ADD_RECORD
 
 
-class ApiRepository(Repository):
+class ApiRepository(ApiAbstractRepository):
 
     def __init__(self):
-        self.api_route = API_ROUTE
+        self.api_route = API_ADD_RECORD
 
     def add(self, record: Record) -> bool:
         try:
-            data = parse.urlencode(record.__dict__).encode()
-            req = request.Request(self.api_route, data=data, method='POST')
+            req = request.Request(self.api_route,
+                                  data=bytes(json.dumps(record.__dict__), encoding='utf-8'),
+                                  method='POST')
             resp = request.urlopen(req, timeout=3)
             print(resp.read())
-        except Exception:
+        except Exception as e:
+            print(f'{e=}')
             return False
 
         return True
 
 
-class ApiFakeRepository(Repository):
+class ApiFakeRepository(ApiAbstractRepository):
 
     def __init__(self):
-        self.api_route = API_ROUTE
+        self.api_route = API_ADD_RECORD
         self.sended = []
 
     def add(self, record: Record) -> bool:
