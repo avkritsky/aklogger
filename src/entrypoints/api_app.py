@@ -5,7 +5,9 @@ from aiohttp import web
 from src.logger.record import Record
 from src.adapters.repository_rabbitmq import RabbitMQRepository
 
+
 routes = web.RouteTableDef()
+
 
 @routes.post('/v1/add')
 async def add_record_route(request: web.Request):
@@ -29,6 +31,7 @@ async def add_record_route(request: web.Request):
         return web.Response(status=200, text=f'{record.user}:{record.project}:Success')
     else:
         return web.Response(status=400, text=f'Can\'t upload data to rabbitmq queue')
+
 
 @routes.get('/v1')
 async def get_main_route(request):

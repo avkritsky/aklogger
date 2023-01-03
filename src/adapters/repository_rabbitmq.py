@@ -20,7 +20,7 @@ class RabbitMQRepository(ApiAbstractRepository):
             return self.__class__._connection
 
         try:
-            connection = await aiormq.connect(RABBITMQ_ADDRESS)
+            connection = await aiormq.connect(RABBITMQ_ADDRESS+'//')
         except Exception as e:
             print(f'Error to connect RabbitMQ: {e}')
             connection = None
