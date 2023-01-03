@@ -1,0 +1,31 @@
+version: "3.2"
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq_logger'
+    ports:
+        - 5672:5672
+        - 15672:15672
+    volumes:
+        - /var/log/rabbitmq/data/:/var/lib/rabbitmq/
+        - /var/log/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+        - rabbitmq_go_net
+
+#  api_logger:
+#    image: rabbitmq:3-management-alpine
+#    container_name: 'rabbitmq_logger'
+#    ports:
+#        - 5672:5672
+#        - 15672:15672
+#    volumes:
+#        - /var/log/rabbitmq/data/:/var/lib/rabbitmq/
+#        - /var/log/rabbitmq/log/:/var/log/rabbitmq
+#    networks:
+#        - rabbitmq_go_net
+#    env_file:
+#      - variables.env
+
+networks:
+  rabbitmq_go_net:
+    driver: bridge

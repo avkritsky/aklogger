@@ -3,6 +3,7 @@ import json
 from aiohttp import web
 
 from src.logger.record import Record
+from src.adapters.repository_rabbitmq import RabbitMQRepository
 
 routes = web.RouteTableDef()
 
@@ -20,9 +21,14 @@ async def add_record_route(request: web.Request):
     except TypeError:
         return web.Response(status=406, text=f'Unknown data')
 
+    rabbit = RabbitMQRepository()
     # print(f'Пользователь {record.user} прислал сообщение: {record.mess}')
-    return web.Response(status=200, text=f'{record.user}:{record.project}:Success')
+    res = await rabbit.add(record)
 
+    if res:
+        return web.Response(status=200, text=f'{record.user}:{record.project}:Success')
+    else:
+        return web.Response(status=400, text=f'Can\'t upload data to rabbitmq queue')
 
 @routes.get('/v1')
 async def get_main_route(request):
