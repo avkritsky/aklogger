@@ -18,7 +18,7 @@ async def test_add_to_repo():
 
 
 @pytest.mark.asyncio
-async def test_load_from_repo():
+async def test_async_load_from_repo():
     b = RabbitMQFakeRepository()
 
     record = Record(user='avkritsky', project='autoblock', ref='test_load_from_repo', level=4,
@@ -32,3 +32,20 @@ async def test_load_from_repo():
         assert arec == record
 
     await b.aget(rprint)
+
+
+@pytest.mark.asyncio
+async def test_sync_load_from_repo():
+    c = RabbitMQFakeRepository()
+
+    record = Record(user='avkritsky', project='autoblock', ref='test_load_from_repo', level=4,
+                    mess='Test message for Unit test RabbitMQ2')
+
+    await c.add(record)
+
+    def rprint(*args):
+        rrecord = Record.from_bytes(args[0])
+
+        assert rrecord == record
+
+    c.get(rprint)

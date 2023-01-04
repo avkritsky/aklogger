@@ -65,13 +65,20 @@ class RabbitMQRepository(ApiAbstractRepository):
 
     def get(self, task: Callable):
         parameters = pika.URLParameters(RABBITMQ_ADDRESS)
-        connection = pika.BlockingConnection(parameters)
-        channel = connection.channel()
-        channel.basic_consume('logger', task)
 
         try:
+            connection = pika.BlockingConnection(parameters)
+            channel = connection.channel()
+            channel.basic_consume('logger', task)
+        except Exception as e:
+            print(f'Ошибка при подключения к RabbitMQ: {e=}')
+            return
+
+        try:
+            print('Ожидание данных ...')
             channel.start_consuming()
-        except Exception:
+        except Exception as e:
+            print(f'Ошибка при получении/ожидании данных от RabbitMQ: {e=}')
             channel.stop_consuming()
 
         connection.close()
@@ -91,8 +98,9 @@ class RabbitMQFakeRepository(ApiAbstractRepository):
 
         await task(declare)
 
-    async def get(self):
-        return FakeDeliveredMessage(self.__class__._memory.pop())
+    def get(self, task: Callable):
+        task(self.__class__._memory.pop())
+        return
 
 
 class FakeDeliveredMessage:
@@ -117,17 +125,17 @@ class FakeDeliveredMessage:
 #     print(record)
 
 
-async def example(a: RabbitMQRepository):
-    for i in range(5):
-        for j in range(100):
-            print(f'add {i=}, {j=}')
-            record = Record(user='avkritsky', project=f'autoblock{i}',
-                            ref='test_logger', level=i,
-                            mess=f'{i}:{j}: Test message for Integration test')
-
-            await a.add(record)
-
-
-if __name__ == '__main__':
-    a = RabbitMQRepository()
-    asyncio.run(example(a))
+# async def example(a: RabbitMQRepository):
+#     for i in range(5):
+#         for j in range(100):
+#             print(f'add {i=}, {j=}')
+#             record = Record(user='avkritsky', project=f'autoblock{i}',
+#                             ref='test_logger', level=i,
+#                             mess=f'{i}:{j}: Test message for Integration test')
+#
+#             await a.add(record)
+#
+#
+# if __name__ == '__main__':
+#     a = RabbitMQRepository()
+#     asyncio.run(example(a))
