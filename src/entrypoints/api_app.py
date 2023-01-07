@@ -15,12 +15,13 @@ async def add_record_route(request: web.Request):
         data = await request.read()
     except Exception as e:
         print(f'Ошибка получения данных от клиента: {e}')
+        return web.Response(status=400, reason=f'Can\'t read data from request: {e}')
     print(data)
 
     try:
         data = json.loads(data.decode(encoding='utf-8'))
     except Exception as e:
-        return web.Response(status=400, reason=f'Can\'t read data: {e}')
+        return web.Response(status=400, reason=f'Can\'t load data: {e}')
 
     try:
         record = Record(**data)

@@ -1,6 +1,4 @@
-import asyncio
-from typing import Optional, Coroutine, Callable, Awaitable
-import json
+from typing import Optional, Callable
 
 import aiormq
 import pika
@@ -39,11 +37,17 @@ class RabbitMQRepository(ApiAbstractRepository):
 
         channel = await connect.channel()
 
-        await channel.queue_declare('logger')
+        try:
+            await channel.queue_declare('logger')
+        except Exception as e:
+            print(f'Ошибка создания очереди Logger: {e}')
+            return False
 
-        await channel.basic_publish(record.rebytes, routing_key='logger')
-
-        await channel.close()
+        try:
+            await channel.basic_publish(record.rebytes, routing_key='logger')
+        except Exception as e:
+            print(f'Ошибка добавления записи в очередь Logger: {e}')
+            return False
 
         return True
 
@@ -115,9 +119,6 @@ class FakeDeliveredMessage:
         self.body = mess
 
 
-
-
-
 # async def exi_worker():
 #     b = RabbitMQRepository()
 #
@@ -132,17 +133,18 @@ class FakeDeliveredMessage:
 #     print(record)
 #
 #
-# async def example(a: RabbitMQRepository):
+# async def example():
+#     a = RabbitMQRepository()
 #     record = Record(user='avkritsky', project=f'autoblock1',
 #                             ref='test_logger', level=4,
-#                             mess=f'Test message for Integration test')
+#                             mess=f'Test message for Integration test1212121212')
 #
-#     await a.add(record)
+#     r = await a.add(record)
+#     print(r)
 #
-#     a.get(process)
+#     return
 #
 #
 # if __name__ == '__main__':
 #
-#     a = RabbitMQRepository()
-#     asyncio.run(example(a))
+#     asyncio.run(example())
