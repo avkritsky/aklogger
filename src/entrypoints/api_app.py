@@ -1,12 +1,15 @@
 import json
 
 from aiohttp import web
+from typing import Optional
 
 from src.logger.record import Record
-from src.adapters.repository_rabbitmq import RabbitMQRepository
+from src.adapters.abc_repository import ApiAbstractRepository
+from src.adapters.repository_rabbitmq import RabbitMQRepository, RabbitMQFakeRepository
 
 
 routes = web.RouteTableDef()
+repository: Optional[type] = None
 
 
 @routes.post('/v1/add')
@@ -27,9 +30,9 @@ async def add_record_route(request: web.Request):
         record = Record(**data)
         print(record)
     except TypeError:
-        return web.Response(status=406, reason=f'Unknown data')
+        return web.Response(status=406, reason=f'Unknown data. Can not create Record.')
 
-    rabbit = RabbitMQRepository()
+    rabbit = repository()
 
     try:
         res = await rabbit.add(record)
@@ -48,13 +51,14 @@ async def get_main_route(request):
     return web.Response(status=200, text='Success')
 
 
-def init(argv):
+def init(repo: ApiAbstractRepository = RabbitMQRepository):
     print('Старт сервера API-LOGGER')
     app = web.Application()
     app.add_routes(routes)
-
+    global repository
+    repository = repo
     return app
 
 
 if __name__ == '__main__':
-    init([])
+    init(RabbitMQFakeRepository)

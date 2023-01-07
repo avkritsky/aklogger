@@ -141,7 +141,7 @@ class NotValidMessage(Exception):
 
 
 if __name__ == '__main__':
-    logger = Logger(ref='test_logger', user='avkritsky', project='logger', level=4)
+    logger = Logger(ref='test_log', user='avkritsky', project='bbrs', level=4)
 
     logger.info('Стартовое сообщение')
     logger.debug('Дебаг инфа')

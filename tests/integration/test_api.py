@@ -4,10 +4,11 @@ import pytest
 
 from src.entrypoints import api_app
 from src.logger.record import Record
+from src.adapters.repository_rabbitmq import RabbitMQFakeRepository
 
 @pytest.fixture
 def cli(event_loop, aiohttp_client):
-    app = api_app.init(None)
+    app = api_app.init(RabbitMQFakeRepository)
 
     return event_loop.run_until_complete(aiohttp_client(app))
 
@@ -29,5 +30,5 @@ async def test_bad_data_sending(cli):
     resp = await cli.post('/v1/add', data=bytes(json.dumps(record).encode('utf-8')))
 
     assert resp.status == 406
-    assert await resp.text() == 'Unknown data'
+    assert resp.reason == 'Unknown data. Can not create Record.'
 
