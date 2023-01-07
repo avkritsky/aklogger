@@ -57,10 +57,10 @@ class ApiRepository(ApiAbstractRepository):
             req = request.Request(self.api_route,
                                   data=bytes(json.dumps(record.__dict__), encoding='utf-8'),
                                   method='POST')
-            resp = request.urlopen(req, timeout=3)
+            resp = request.urlopen(req, timeout=5)
             print(resp.read())
         except Exception as e:
-            print(f'{e=}')
+            print(f'Ошибка отправки запроса на API-LOGGER: {e=}')
             return False
 
         return True
@@ -74,7 +74,7 @@ class Logger:
                  user: str = 'none',
                  project: str = 'common',
                  level: int = 4,
-                 api_route: str = 'http://0.0.0.0:7007/v1/add',
+                 api_route: str = 'http://localhost:7007/v1/add',
                  api_repository: ApiAbstractRepository = None):
         if ref in self.__class__._instance:
             self.__dict__ = self.__class__._instance[ref].__dict__

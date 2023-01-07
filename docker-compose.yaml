@@ -4,43 +4,41 @@ services:
     image: rabbitmq:3-management-alpine
     container_name: 'rabbitmq_logger'
     restart: always
-    ports:
-        - 5672:5672
-        - 15672:15672
     volumes:
         - /var/log/rabbitmq/data/:/var/lib/rabbitmq/
         - /var/log/rabbitmq/log/:/var/log/rabbitmq
-    networks:
-        - rabbitmq_go_net
-
-  api_logger:
-    image: python:3.10-slim-bullseye
-    container_name: 'api_logger'
-    restart: always
-    ports:
-        - 7007:7007
-    volumes:
-        - .:/var/www/html/
-    networks:
-        - rabbitmq_go_net
+    network_mode: "host"
     env_file:
       - variables.env
-    working_dir: /var/www/html
-    command: bash start_api.sh
 
-  workers_logger:
-    image: python:3.10-slim-bullseye
-    container_name: 'workers_logger'
-    restart: always
-    volumes:
-        - .:/var/www/html/
-    networks:
-        - rabbitmq_go_net
-    env_file:
-      - variables.env
-    working_dir: /var/www/html
-    command: bash start_workers.sh
+#  api_logger:
+#    image: python:3.10-slim-bullseye
+#    container_name: 'api_logger'
+#    restart: always
+#    ports:
+#        - 7007:7007
+#    volumes:
+#        - .:/var/www/html/
+#    networks:
+#        - rabbitmq_go_net
+#    env_file:
+#      - variables.env
+#    working_dir: /var/www/html
+#    command: bash start_api.sh
+#
+#  workers_logger:
+#    image: python:3.10-slim-bullseye
+#    container_name: 'workers_logger'
+#    restart: always
+#    volumes:
+#        - .:/var/www/html/
+#    networks:
+#        - rabbitmq_go_net
+#    env_file:
+#      - variables.env
+#    working_dir: /var/www/html
+#    command: bash start_workers.sh
 
-networks:
-  rabbitmq_go_net:
-    driver: bridge
+#networks:
+#  rabbitmq_go_net: {}
+    # driver: bridge

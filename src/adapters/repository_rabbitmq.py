@@ -20,6 +20,7 @@ class RabbitMQRepository(ApiAbstractRepository):
             return self.__class__._connection
 
         try:
+            print(RABBITMQ_ADDRESS)
             connection = await aiormq.connect(RABBITMQ_ADDRESS+'//')
         except Exception as e:
             print(f'Error to connect RabbitMQ: {e}')
@@ -68,10 +69,16 @@ class RabbitMQRepository(ApiAbstractRepository):
 
         try:
             connection = pika.BlockingConnection(parameters)
-            channel = connection.channel()
-            channel.basic_consume('logger', task)
         except Exception as e:
             print(f'Ошибка при подключения к RabbitMQ: {e=}')
+            return
+
+        try:
+            channel = connection.channel()
+            channel.queue_declare('logger')
+            channel.basic_consume('logger', task)
+        except Exception as e:
+            print(f'Ошибка подключения к каналу Logger: {e}')
             return
 
         try:
@@ -120,22 +127,22 @@ class FakeDeliveredMessage:
 #         await asyncio.sleep(5)
 #
 #
-# async def process(record: aiormq.abc.DeliveredMessage):
-#     record = json.loads(record.body.decode('utf-8'))
+# def process(*record):
+#     # record = json.loads(record.body.decode('utf-8'))
 #     print(record)
-
-
-# async def example(a: RabbitMQRepository):
-#     for i in range(5):
-#         for j in range(100):
-#             print(f'add {i=}, {j=}')
-#             record = Record(user='avkritsky', project=f'autoblock{i}',
-#                             ref='test_logger', level=i,
-#                             mess=f'{i}:{j}: Test message for Integration test')
 #
-#             await a.add(record)
+#
+# async def example(a: RabbitMQRepository):
+#     record = Record(user='avkritsky', project=f'autoblock1',
+#                             ref='test_logger', level=4,
+#                             mess=f'Test message for Integration test')
+#
+#     await a.add(record)
+#
+#     a.get(process)
 #
 #
 # if __name__ == '__main__':
+#
 #     a = RabbitMQRepository()
 #     asyncio.run(example(a))
